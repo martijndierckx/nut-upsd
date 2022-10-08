@@ -1,6 +1,10 @@
 # Network UPS Tools server
 
-Docker image for Network UPS Tools server.
+**Work in Progress** Docker image for Network UPS Tools server.
+
+Issues:
+- Still crashes on auto start. Circumvented by adjusting the entrypoint to an eternal sleep, and manually starting the docker-entrypoint script by attaching to the container
+- Need to figure out how to use a upsmon user without password
 
 ## Usage
 
@@ -8,14 +12,24 @@ This image provides a complete UPS monitoring service (USB driver only).
 
 Start the container:
 
-```console
-# docker run \
-	--name nut-upsd \
-	--detach \
-	--publish 3493:3493 \
-	--device /dev/bus/usb/xxx/yyy \
-	--env SHUTDOWN_CMD="my-shutdown-command-from-container" \
-	upshift/nut-upsd
+```
+version: "3.8"
+
+services:
+  nut-upsd:
+    container_name: nut-upsd
+    image: martijndierckx/nut-upsd:latest
+    restart: unless-stopped
+    ports:
+      - "3493:3493"
+    #environment:
+      #- UPS_NAME=UPS
+      #- UPS_DESC=APC BX1600MI
+      #- API_USER=upsmon
+      #- API_PASSWORD=
+    volumes:
+      - /dev/bus/usb/002:/dev/bus/usb/002
+    privileged: true
 ```
 
 ## Auto configuration via environment variables
