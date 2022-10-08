@@ -1,8 +1,6 @@
-FROM alpine:3.12
+FROM alpine:latest
 
-LABEL maintainer="docker@upshift.fr"
-
-ENV NUT_VERSION 2.7.4
+ENV NUT_VERSION 2.8.0
 
 ENV UPS_NAME="ups"
 ENV UPS_DESC="UPS"
@@ -27,7 +25,7 @@ RUN set -ex; \
 	; \
 	# download and extract
 	cd /tmp; \
-	wget http://www.networkupstools.org/source/2.7/nut-$NUT_VERSION.tar.gz; \
+	wget https://github.com/networkupstools/nut/releases/download/v$NUT_VERSION/nut-$NUT_VERSION.tar.gz; \
 	tar xfz nut-$NUT_VERSION.tar.gz; \
 	cd nut-$NUT_VERSION \
 	; \
@@ -51,8 +49,9 @@ RUN set -ex; \
 	; \
 	# create nut user
 	adduser -D -h /var/run/nut nut; \
-	chgrp -R nut /etc/nut; \
-	chmod -R o-rwx /etc/nut; \
+	chown -R nut:nut /etc/nut; \
+	chmod 774 /etc/nut; \
+	chmod 664 /etc/nut/*; \
 	install -d -m 750 -o nut -g nut /var/run/nut \
 	; \
 	# cleanup
