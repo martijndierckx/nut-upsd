@@ -1,10 +1,5 @@
 #!/bin/sh -ex
 
-if [ -z "$API_PASSWORD" ]
-then
-   API_PASSWORD=$(dd if=/dev/urandom bs=18 count=1 2>/dev/null | base64)
-fi
-
 if [ -z "$ADMIN_PASSWORD" ]
 then
    ADMIN_PASSWORD=$(dd if=/dev/urandom bs=18 count=1 2>/dev/null | base64)
@@ -29,18 +24,17 @@ cat >/etc/nut/upsd.users <<EOF
 	instcmds = all
 
 [monitor]
-	password = $API_PASSWORD
 	upsmon master
 EOF
 
 cat >/etc/nut/upsmon.conf <<EOF
-MONITOR $UPS_NAME@localhost 1 monitor $API_PASSWORD master
+MONITOR $UPS_NAME@localhost 1 monitor master
 SHUTDOWNCMD "$SHUTDOWN_CMD"
 EOF
 
-chgrp -R nut /etc/nut /dev/bus/usb
-chmod -R o-rwx /etc/nut
+#chgrp -R nut /etc/nut /dev/bus/usb
+#chmod -R 600 /etc/nut
 
 /usr/sbin/upsdrvctl start
-/usr/sbin/upsd
+/usr/sbin/upsd -F &
 exec /usr/sbin/upsmon -D
